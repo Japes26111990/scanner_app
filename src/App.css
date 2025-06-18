@@ -1,0 +1,17 @@
+/* Add this at the top */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+/* The rest of the CSS stays the same */
+.card {
+  /* ... */
+}
+/* ... */
