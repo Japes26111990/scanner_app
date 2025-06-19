@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
-
-// We can reuse the button styles from App.css
 import '../App.css'; 
 
 export const JobActionModal = ({ jobId, onClose }) => {
@@ -10,7 +8,6 @@ export const JobActionModal = ({ jobId, onClose }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // This useEffect runs as soon as the modal opens to fetch the job details
     useEffect(() => {
         const fetchJobDetails = async () => {
             setLoading(true);
@@ -68,9 +65,7 @@ export const JobActionModal = ({ jobId, onClose }) => {
     };
     
     return (
-        // Backdrop
         <div className="modal-backdrop" onClick={onClose}>
-            {/* Modal Content */}
             <div className="card" onClick={(e) => e.stopPropagation()}>
                 <h2 style={{ fontSize: '1.5rem', marginTop: 0 }}>Scanned Job</h2>
                 
@@ -78,17 +73,19 @@ export const JobActionModal = ({ jobId, onClose }) => {
                 {error && <p className="error-text">Error: {error}</p>}
                 
                 {job && (
-                  <div className="job-details">
-                    <p><strong>Part:</strong> {job.partName}</p>
-                    <p><strong>Employee:</strong> {job.employeeName}</p>
-                    <p><strong>Status:</strong> <span className="status-text">{job.status}</span></p>
+                  <>
+                    <div className="job-details" style={{ borderBottom: '1px solid #374151', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                      <p><strong>Part:</strong> {job.partName}</p>
+                      <p><strong>Employee:</strong> {job.employeeName}</p>
+                      <p><strong>Status:</strong> <span className="status-text">{job.status}</span></p>
+                    </div>
 
                     <div className="actions">
-                      <button className="button" onClick={() => handleUpdateStatus('In Progress')} disabled={loading || job.status === 'In Progress'}>Start / Resume Job</button>
-                      <button className="button button-secondary" onClick={() => handleUpdateStatus('Paused')} disabled={loading || job.status === 'Paused'}>Pause Job</button>
-                      <button className="button button-complete" onClick={() => handleUpdateStatus('Awaiting QC')} disabled={loading}>Complete Job</button>
+                      <button className="button" onClick={() => handleUpdateStatus('In Progress')} disabled={loading || job.status === 'In Progress'}>Start</button>
+                      <button className="button button-secondary" onClick={() => handleUpdateStatus('Paused')} disabled={loading || job.status === 'Paused'}>Pause</button>
+                      <button className="button button-complete" onClick={() => handleUpdateStatus('Awaiting QC')} disabled={loading}>Complete</button>
                     </div>
-                  </div>
+                  </>
                 )}
             </div>
         </div>

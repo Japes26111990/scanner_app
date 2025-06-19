@@ -10,8 +10,80 @@
   z-index: 1000;
 }
 
-/* The rest of the CSS stays the same */
 .card {
-  /* ... */
+  margin-top: 1rem;
+  padding: 2rem;
+  background-color: #1f2937;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  width: 100%;
+  max-width: 500px; /* Set a max-width for the modal card */
 }
-/* ... */
+
+.job-details p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.status-text {
+  font-weight: bold;
+  color: #facc15; /* yellow-400 */
+}
+
+.error-text {
+  color: #f87171; /* red-400 */
+}
+
+/* --- UPDATED: Actions class for horizontal buttons --- */
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: row; /* Changed to row */
+  justify-content: space-between; /* Space out the buttons */
+  gap: 1rem;
+}
+
+.button {
+  flex-grow: 1; /* Make buttons share space equally */
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #2563eb; /* blue-600 */
+  transition: background-color 0.2s;
+}
+.button:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}
+
+.button:disabled {
+  background-color: #374151;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-secondary {
+    background-color: #4b5563; /* gray-600 */
+}
+.button-secondary:hover {
+    background-color: #374151; /* gray-700 */
+}
+
+.button-complete {
+    background-color: #16a34a; /* green-600 */
+}
+.button-complete:hover {
+    background-color: #15803d; /* green-700 */
+}
+
+.button-reset {
+    margin-top: 2rem;
+    background-color: #9ca3af;
+    color: #1f2937;
+}
+.button-reset:hover {
+    background-color: #6b7280;
+}

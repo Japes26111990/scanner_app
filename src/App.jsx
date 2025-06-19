@@ -1,86 +1,83 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { db, auth } from './firebase'; // Import auth
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Import sign-in function
-import { collection, query, where, getDocs, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
-import './App.css';
+import { Html5Qrcode, Html5QrcodeScanType } from 'html5-qrcode';
 import { JobActionModal } from './components/JobActionModal';
-
+import './App.css';
+import tojemLogo from './assets/tojem-logo.png'; // 1. Import the logo at the top
 
 function App() {
   const [scannedJobId, setScannedJobId] = useState(null);
-  const [isAuthReady, setIsAuthReady] = useState(false); // New state to track login status
+  const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef(null);
+  const timeoutRef = useRef(null);
 
-  // --- NEW: useEffect for automatic login ---
-  useEffect(() => {
-    const email = import.meta.env.VITE_SCANNER_USER_EMAIL;
-    const password = import.meta.env.VITE_SCANNER_USER_PASSWORD;
-
-    const authenticate = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        setIsAuthReady(true); // Login successful, app is ready
-      } catch (error) {
-        console.error("Authentication failed:", error);
-        // Display a permanent error if login fails, as the app cannot work.
-        document.body.innerHTML = '<h1 style="color: red; text-align: center; margin-top: 50px;">Authentication Failed. Check scanner credentials.</h1>';
-      }
-    };
+  const startScanner = () => {
+    if (!scannerRef.current) {
+        scannerRef.current = new Html5Qrcode("qr-reader");
+    }
     
-    authenticate();
-  }, []); // Runs only once on app startup
-
-
-  useEffect(() => {
-    if (!isAuthReady || scannerRef.current) return; // Don't initialize scanner until logged in
-
-    const onScanSuccess = (decodedText) => {
-      setScannedJobId(decodedText);
-    };
+    setIsScanning(true);
 
     const config = {
       fps: 10,
       qrbox: { width: 250, height: 250 },
       rememberLastUsedCamera: true,
       supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-      camera: { facingMode: "environment" }
     };
-    
-    const html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", config, false);
-    html5QrcodeScanner.render(onScanSuccess);
-    scannerRef.current = html5QrcodeScanner;
 
-  }, [isAuthReady]); // Dependency on auth status
+    scannerRef.current.start(
+        { facingMode: "environment" }, 
+        config, 
+        (decodedText) => {
+            setScannedJobId(decodedText);
+            stopScanner();
+        },
+        (errorMessage) => { /* ignore */ }
+    ).catch(err => {
+        console.error("Unable to start scanning.", err);
+        setIsScanning(false);
+    });
 
-  // When the modal closes, we clear the scanner and it will be re-rendered
+    timeoutRef.current = setTimeout(() => {
+        console.log("Scanner timed out due to inactivity.");
+        stopScanner();
+    }, 300000);
+  };
+
+  const stopScanner = () => {
+    // Check if the scanner has the stop method before calling it
+    if (scannerRef.current && typeof scannerRef.current.stop === 'function' && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(err => console.error("Failed to stop scanner.", err));
+    }
+    if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+    }
+    setIsScanning(false);
+  };
+
   const handleModalClose = () => {
-      if(scannerRef.current) {
-          // A short delay can help ensure the UI is ready for the scanner to restart
-          setTimeout(() => {
-              if(!scannerRef.current.isScanning) {
-                 scannerRef.current.render( (decodedText) => setScannedJobId(decodedText) );
-              }
-          }, 100);
-      }
-      setScannedJobId(null);
-  }
-
-  // If not authenticated, show a loading message
-  if (!isAuthReady) {
-    return <h1 style={{ color: 'white' }}>Authenticating Scanner...</h1>;
-  }
+    setScannedJobId(null);
+  };
 
   return (
     <div>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', color: '#7dd3fc', letterSpacing: '1px' }}>
-          TOJEM Workshop Scanner
+      {/* 2. Update the header to include the image and flexbox styles for alignment */}
+      <header style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+        <img src={tojemLogo} alt="TOJEM Logo" style={{ height: '50px' }} />
+        <h1 style={{ fontSize: '2.5rem', color: '#7dd3fc', letterSpacing: '1px', margin: 0 }}>
+          Workshop Scanner
         </h1>
       </header>
 
       <main>
-        <div id="qr-reader" style={{ display: scannedJobId ? 'none' : 'block', width: '100%' }}></div>
+        <div id="qr-reader" style={{ width: '100%', border: isScanning ? 'none' : '2px dashed #374151', borderRadius: '8px', minHeight: '300px' }}></div>
+        
+        {!isScanning && !scannedJobId && (
+            <div style={{ marginTop: '2rem' }}>
+                <button className="button" style={{ padding: '1.5rem', fontSize: '1.5rem' }} onClick={startScanner}>
+                    Start Scanning
+                </button>
+            </div>
+        )}
         
         {scannedJobId && (
             <JobActionModal 
