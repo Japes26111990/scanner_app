@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeScanType } from 'html5-qrcode';
 import { JobActionModal } from './components/JobActionModal';
 import './App.css';
-import tojemLogo from './assets/tojem-logo.png'; // 1. Import the logo at the top
+import tojemLogo from './assets/tojem-logo.png';
 
 function App() {
   const [scannedJobId, setScannedJobId] = useState(null);
@@ -10,6 +10,7 @@ function App() {
   const scannerRef = useRef(null);
   const timeoutRef = useRef(null);
 
+  // This function starts the scanner and the timeout
   const startScanner = () => {
     if (!scannerRef.current) {
         scannerRef.current = new Html5Qrcode("qr-reader");
@@ -27,25 +28,26 @@ function App() {
     scannerRef.current.start(
         { facingMode: "environment" }, 
         config, 
-        (decodedText) => {
+        (decodedText) => { // onScanSuccess
             setScannedJobId(decodedText);
-            stopScanner();
+            stopScanner(); // Stop scanning immediately on success
         },
-        (errorMessage) => { /* ignore */ }
+        (errorMessage) => { /* onScanFailure, ignore */ }
     ).catch(err => {
         console.error("Unable to start scanning.", err);
         setIsScanning(false);
     });
 
+    // Set a 5-minute timeout to stop the scanner automatically
     timeoutRef.current = setTimeout(() => {
         console.log("Scanner timed out due to inactivity.");
         stopScanner();
-    }, 300000);
+    }, 300000); // 5 minutes = 300,000 milliseconds
   };
 
+  // This function stops the scanner and clears the timeout
   const stopScanner = () => {
-    // Check if the scanner has the stop method before calling it
-    if (scannerRef.current && typeof scannerRef.current.stop === 'function' && scannerRef.current.isScanning) {
+    if (scannerRef.current && scannerRef.current.isScanning) {
         scannerRef.current.stop().catch(err => console.error("Failed to stop scanner.", err));
     }
     if (timeoutRef.current) {
@@ -60,12 +62,14 @@ function App() {
 
   return (
     <div>
-      {/* 2. Update the header to include the image and flexbox styles for alignment */}
-      <header style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-        <img src={tojemLogo} alt="TOJEM Logo" style={{ height: '50px' }} />
-        <h1 style={{ fontSize: '2.5rem', color: '#7dd3fc', letterSpacing: '1px', margin: 0 }}>
-          Workshop Scanner
-        </h1>
+      {/* --- THIS IS THE UPDATED HEADER --- */}
+      <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
+        <img 
+          src={tojemLogo} 
+          alt="TOJEM Logo" 
+          style={{ height: '80px', display: 'inline-block' }} 
+        />
+        {/* The <h1> title has been removed */}
       </header>
 
       <main>
